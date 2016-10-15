@@ -1,3 +1,9 @@
+# customize
+data/
+temp/
+user_tag_query.2W.TEST
+user_tag_query.2W.TRAIN
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
