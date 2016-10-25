@@ -12,7 +12,6 @@ from queue import Empty
 
 import numpy as np
 import pynlpir
-import re
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing.data import normalize
 
@@ -283,75 +282,17 @@ def parsetest2sparse(test, dictarray):
 
 if __name__ == '__main__':
     samemaxcount = 0
-    begin = datetime.now()
-    print(begin)
-    train = Reader()  # 读train数据
-    train.init()
-    # train.save('train')
-    step1 = datetime.now()
-    print(step1)
-    test = Reader()  # 读test数据
-    test.init(filename=TESTSETFILE, IsTraining=False, IsSegment=True)
-    # test.save('test')
-    step2 = datetime.now()
-    print(step2)
-    train.tf_idf()  # 计算train的tf_idf
-    test.tf_idf()  # 计算test的tf_idf
-    # train.save('train_tf_idf')
-    # test.save('test_tf_idf')
-    step3 = datetime.now()
-    print(step3)
+    with open('test_pickle', 'rb') as f:
+        test = pickle.load(f)
+    with open('train_pickle', 'rb') as f:
+        train = pickle.load(f)
+    with open('csrtrain_pickle', 'rb') as f:
+        csrtrain = pickle.load(f)
+    with open('csrtest_pickle', 'rb') as f:
+        csrtest = pickle.load(f)
 
-    dump('train', train)
-    dump('test', test)
-
-    ''' ------------------------------华丽的json分割线-----------------------------------'''
-    # 使用这里的代码可替代上面的代码，直接读取上面的分词结果
-    # import json
-    #
-    # train = Reader()
-    # with open('train_userlist') as f:
-    #     train.userlist = json.load(f)
-    # with open('train_userinfo') as f:
-    #     train.userinfo = json.load(f)
-    # with open('train_dict') as f:
-    #     train.dict = json.load(f)
-    # test = Reader()
-    # with open('test_userlist') as f:
-    #     test.userlist = json.load(f)
-    # with open('test_userinfo') as f:
-    #     test.userinfo = json.load(f)
-    # with open('test_dict') as f:
-    #     test.dict = json.load(f)
-    # print('read json file finished')
-
-    ''' ------------------------------华丽的json分割线-----------------------------------'''
-    pattern = re.compile(r'.*[^\u4e00-\u9fa5].*')
-    for key in list(train.dict.keys()):
-        if re.search(pattern, key) is not None:
-            del train.dict[key]
-    dictlist = sorted(list(train.dict.keys()))
-    csrtrain = parsetrain2sparse(train, dictlist)
-    print('parsetrain2sparse finish %s' % datetime.now())
-    csrtest = parsetest2sparse(test, dictlist)
-    print('parsetest2sparse finish %s' % datetime.now())
-    dump('csrtrain', csrtrain)
-    dump('csrtest', csrtest)
-
-    ''' ------------------------------华丽的sparse分割线-----------------------------------'''
-
-    # 使用这里的代码替代上面的代码，直接读取sparse矩阵
-    # with open('csrtrain_pickle', 'rb') as f: # float16
-    #     csrtrain = pickle.load(f)
-    # with open('csrtest_pickle', 'rb') as f:
-    #     csrtest = pickle.load(f)
-    # csrtrain= csrtrain.astype(np.float64)
-
-    ''' ------------------------------华丽的sparse分割线-----------------------------------'''
     csctrainnor = normalize(csrtrain, norm='l2', axis=0)
     csrtrain = csctrainnor.tocsr()
-    # csrtrain = csrtrain.astype(np.float32)
-    # csrtest = csrtest.astype(np.float32)
 
     csrcosine = csrtest.dot(csrtrain)  # 矩阵乘法
     print('dot finish %s' % datetime.now())
